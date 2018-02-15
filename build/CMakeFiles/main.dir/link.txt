@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++11 -O0 -g3 -Wall -Wextra    CMakeFiles/main.dir/clang.cpp.o CMakeFiles/main.dir/filesystem.cpp.o CMakeFiles/main.dir/process.cpp.o CMakeFiles/main.dir/main.cpp.o  -o main -rdynamic 
