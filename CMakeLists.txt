@@ -12,6 +12,6 @@ add_executable(main
 	filesystem.hpp
 	process.cpp
 	process.hpp
-	globalVal.hpp
+	
 	main.cpp
 )

@@ -2,7 +2,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <unistd.h>
-extern bool quitingTime;
+extern bool quittingTime;
 int killPID(const pid_t& PID,int sig)
 {
 

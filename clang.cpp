@@ -3,8 +3,7 @@
 #include <cstdio>
 #include <cmath>
 #include "clang.hpp"
-#include "globalVal.hpp"
-extern bool quitingTime;
+extern bool quittingTime;
 
 void addOpt(void){
 	int c=0;

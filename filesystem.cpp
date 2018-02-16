@@ -2,7 +2,6 @@
 #include <csignal>
 #include <cstdio>
 #include <sys/stat.h>
-#include "globalVal.hpp"
 #include "filesystem.hpp"
 #include <string>
 #include <unistd.h>
@@ -15,7 +14,7 @@
 #endif
 
 using namespace std;
-extern bool quitingTime;
+extern bool quittingTime;
 
 string getcwdF()
 {
@@ -41,7 +40,7 @@ int accessCheck(const char* p,int flag)
 }
 void syncFun()
 {
-	sync();
+	cin.sync();
 }
 int chmodFun(const char* path)
 {

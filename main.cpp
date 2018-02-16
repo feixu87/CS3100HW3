@@ -1,13 +1,14 @@
 #include <iostream>
 #include <csignal>
 #include <cstdio>
-#include "globalVal.hpp"
 #include "clang.hpp"
 #include "process.hpp"
 #include "filesystem.hpp"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 /*
  * This program performs CPU-bound and I/O-bound operations so you can observe
  * its performance characteristics from a process monitor such as htop.
@@ -89,16 +90,18 @@ int main(int argc, char** argv) {
     if (argc < 2 )
 	{
 		cout << "error" <<endl;
+		help();
 		return 0;
 	}
     pid_t PID= getpid();
     cout << PID<<endl;
-    char inputnum=(argv[1]);
+    char* input=(argv[1]);
+    char inputnum=input[0];
     bool inputFlag=true;
     while(!quittingTime)
     {
 	
-        if(inputnum<'a'||inputnum>'n'&&inputnum~='q')
+        if(inputnum<'a'||inputnum>'n'&&inputnum!='q')
 	{
 		help();
 		cin >> inputnum;
@@ -112,89 +115,136 @@ int main(int argc, char** argv) {
      * the terminal) to our sigint() function, defined above */
     signal(SIGINT, sigint);
 	
-        switch (resp) {
+        switch (inputnum) {
             case 'a':
-                cout << getcwdF() <<endl;
+            {
+		cout << getcwdF() <<endl;
                 break;
-
+            }
             case 'b':
+	    {
 		string newpath;
 		cout << "enter the new directory:" <<endl;   
 		cin >> newpath;	
 		cin.get();
                 chdirFun(newpath);
+		cout << "new directory:" <<getcwdF()<<endl;
                 break;
-
+	    }
 	    case 'c':
+            {
 		char* path="/proc/self/exe";
 		int flag;
+		check();
+		cout << "enter the option:" ;
 		cin >> flag;
-		while(flag~=0 && flag~=1 &&flag ~=2)
+		syncFun();
+		while(flag!=0 && flag!=1 &&flag !=2)
 		{
 			check();
 			cin >> flag;
 		}	
-		int revl=accessCheck(p,flag);
+		int revl=accessCheck(path,flag);
 		if(revl==0)
 			cout << "The file can be accessed." << endl;
 		else
 			cout << "Access denied." << endl;
 		break;
+	    }
             case 'd':
+	    {
 		syncFun();
 		break;
+	    }
             case 'e':
-		chmodFun("/proc/self/exe");
+	    {
+		int rev=chmodFun("/proc/self/exe");
+		if(rev==0)
+			cout << "sucess!" <<endl;
+		else
+			cout << "error" << endl;
 		break;
+	    }
             case 'f':
+	    {
 		int defout=dup(1);
-		int fd=open("out.txt", O_RDWR | O_TRUNC | O_CREAT);
-		dup2F(fd,1);
+		mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+		int fd=open("out.txt", O_RDWR | O_TRUNC | O_CREAT,mode);
+		int rev=dup2F(fd,1);
+		if(rev==0)
+			cout << "sucess!" <<endl;
+		else
+			cout << "error" << endl;
+		close(fd);
 		break;
+	    }
             case 'g':
 		addOpt();
 		break;
             case 'h':
-		sqrtOpt();
+	    {
+   		sqrtOpt();
 		break;
-
+	    }
             case 'i':
+	    {
 		NewDel();
 		break;
+	    }
             case 'j':
 		NewAll();
 		break;           
 	    case 'k':
+	    {
 		cout << "two options:0, send siginal 0 ;1, send singinal SIGUSR2:" << endl;
 		int sig;
 		cin >> sig;
-		while(sig~=0 && sig~=1)
+		while(sig!=0 && sig!=1)
+		{	
+			cout << "enter the option: 0 or 1" ;
 			cin >> sig;
+		}
 		if(sig==0)
-			killPID(PID,0);
+		{
+		if(killPID(PID,0))
+			cout << "sucess!"<<endl;
 		else
-			killPID(PID,SIGUSR2);
+			cout << "fail!" << endl;
+		}	
+		else
+		{	
+		if(killPID(PID,SIGUSR2))
+			cout << "sucess!"<<endl;
+		else
+			cout << "fail!" << endl;
+		}
 		break;
-
+	    }
             case 'l':
+	    {
 		struct timespec spec;
 		
 		clock(&spec);
 		
-		s  = spec.tv_sec;
-    		ms = round(spec.tv_nsec / 1.0e6);
-		printf("Current time: %"PRIdMAX".%03ld seconds since the Epoch\n",
-           (intmax_t)s, ms);
+		double ts  = spec.tv_sec+double(spec.tv_nsec / 1.0e6);
+    		
+		printf("Current time:%03ld seconds since the Epoch\n",
+           ts);
 		break;
+	    }
             case 'm':
+	    {
 		cout <<"the sleep functions:enter the delaying time, unit nanosec" <<endl;
 		int nanosec;
 		cin >> nanosec;
 		mysleep(nanosec);
 		break;
+	    }
             case 'n':
+	    {
 		int status;
 		pid_t child_pid=forkFun();
+		cout << child_pid<<endl;
 	  	if (child_pid< 0) {     /* fork a child process           */
 	         printf("*** ERROR: forking child process failed\n");
 	         exit(1);
@@ -207,10 +257,14 @@ int main(int argc, char** argv) {
 		}
 		
 		break;
+	    }
             case 'q':
+	    {	
                 quittingTime = true;
-                break;
+                exit(0);
+	    }
         }
+	cout <<"enter your option:";
 	cin >> inputnum;
     }
   
